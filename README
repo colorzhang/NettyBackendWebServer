@@ -1,0 +1,71 @@
+Intel(R) Core(TM) i7-2630QM CPU @ 2.00GHz
+MemTotal:        3956836 kB
+
+
+build/default/weighttp -n 100000 -k -c 100 http://localhost:9999/
+weighttp - a lightweight and simple webserver benchmarking tool
+
+starting benchmark...
+spawning thread #1: 100 concurrent requests, 100000 total requests
+progress:  10% done
+progress:  20% done
+progress:  30% done
+progress:  40% done
+progress:  50% done
+progress:  60% done
+progress:  70% done
+progress:  80% done
+progress:  90% done
+progress: 100% done
+
+finished in 2 sec, 34 millisec and 185 microsec, 49159 req/s, 7247 kbyte/s
+requests: 100000 total, 100000 started, 100000 done, 100000 succeeded, 0 failed, 0 errored
+status codes: 100000 2xx, 0 3xx, 0 4xx, 0 5xx
+traffic: 15096896 bytes total, 14596896 bytes http, 500000 bytes data
+
+
+With MyBatis and cache
+build/default/weighttp -n 100000 -k -c 100 http://localhost:9999/
+weighttp - a lightweight and simple webserver benchmarking tool
+
+starting benchmark...
+spawning thread #1: 100 concurrent requests, 100000 total requests
+progress:  10% done
+progress:  20% done
+progress:  30% done
+progress:  40% done
+progress:  50% done
+progress:  60% done
+progress:  70% done
+progress:  80% done
+progress:  90% done
+progress: 100% done
+
+finished in 11 sec, 307 millisec and 917 microsec, 8843 req/s, 1485 kbyte/s
+requests: 100000 total, 100000 started, 100000 done, 100000 succeeded, 0 failed, 0 errored
+status codes: 100000 2xx, 0 3xx, 0 4xx, 0 5xx
+traffic: 17196761 bytes total, 14696761 bytes http, 2500000 bytes data
+
+
+With MyBatis without cache
+build/default/weighttp -n 100000 -k -c 100 http://localhost:9999/
+weighttp - a lightweight and simple webserver benchmarking tool
+
+starting benchmark...
+spawning thread #1: 100 concurrent requests, 100000 total requests
+progress:  10% done
+progress:  20% done
+progress:  30% done
+progress:  40% done
+progress:  50% done
+progress:  60% done
+progress:  70% done
+progress:  80% done
+progress:  90% done
+progress: 100% done
+
+finished in 96 sec, 461 millisec and 30 microsec, 1036 req/s, 174 kbyte/s
+requests: 100000 total, 100000 started, 100000 done, 100000 succeeded, 0 failed, 0 errored
+status codes: 100000 2xx, 0 3xx, 0 4xx, 0 5xx
+traffic: 17196741 bytes total, 14696741 bytes http, 2500000 bytes data
+

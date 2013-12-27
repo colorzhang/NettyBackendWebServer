@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="test.backend.persistence.TestMapper">
+
+	<cache />
+
+	<select id="selectOne" parameterType="long" resultType="test">
+		SELECT
+		t.id, t.name
+		FROM test t
+		WHERE t.id = #{id}
+	</select>
+</mapper>
