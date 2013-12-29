@@ -12,6 +12,8 @@ import test.backend.persistence.TestMapper;
 
 public class Provider implements Callable<Object> {
 
+	private final String path;
+	
 	private final Values values;
 
 	private final static SqlSessionFactory sqlSessionFactory;
@@ -22,7 +24,8 @@ public class Provider implements Callable<Object> {
 				.build(configAsStream);
 	}
 
-	public Provider(Values values) {
+	public Provider(String path, Values values) {
+		this.path = path;
 		this.values = values;
 	}
 
@@ -30,12 +33,16 @@ public class Provider implements Callable<Object> {
 	public Object call() throws Exception {
 		Object res = null;
 
-		try (SqlSession session = sqlSessionFactory
-				.openSession(TransactionIsolationLevel.REPEATABLE_READ)) {
-			TestMapper mapper = session.getMapper(TestMapper.class);
-			res = mapper.selectOne(1L);
-			session.commit();
-		}
+//		try (SqlSession session = sqlSessionFactory
+//				.openSession(TransactionIsolationLevel.REPEATABLE_READ)) {
+//			TestMapper mapper = session.getMapper(TestMapper.class);
+//			res = mapper.selectOne(1L);
+//			session.commit();
+//		}
+		
+		Integer duration = values.getAsInteger("duration");
+		Thread.sleep(duration * 1000);
+		res = "Slept for " + duration + " secs";
 
 		return res;
 		// throw new RuntimeException("Hello, Exception!");

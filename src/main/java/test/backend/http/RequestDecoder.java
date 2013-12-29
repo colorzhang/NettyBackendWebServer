@@ -1,5 +1,6 @@
 package test.backend.http;
 
+import test.backend.http.message.Request;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.DecoderResult;
@@ -7,15 +8,9 @@ import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.util.ReferenceCountUtil;
 
-import java.util.Queue;
-
 public class RequestDecoder extends SimpleChannelInboundHandler<HttpObject> {
-
-	private final Queue<HttpRequest> requestQueue;
-
-	public RequestDecoder(Queue<HttpRequest> requestQueue) {
-		this.requestQueue = requestQueue;
-	}
+	
+	private long orderNumber;
 
 	@Override
 	public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
@@ -35,8 +30,9 @@ public class RequestDecoder extends SimpleChannelInboundHandler<HttpObject> {
 			HttpRequest request = (HttpRequest) httpObject;
 
 			ReferenceCountUtil.retain(httpObject);
-			requestQueue.add(request);
+			ctx.fireChannelRead(new Request(request, orderNumber));
 		}
-		ctx.fireChannelRead(httpObject);
+		
+		orderNumber += 1;
 	}
 }

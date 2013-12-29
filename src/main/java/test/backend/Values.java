@@ -16,8 +16,6 @@ public class Values {
 			.getLogger(DefaultExceptionHandler.class);
 
 	private HashMap<String, Object> values;
-	
-	private String path;
 
 	public Values() {
 		values = new HashMap<String, Object>(8);
@@ -29,14 +27,6 @@ public class Values {
 
 	public Values(Values from) {
 		values = new HashMap<String, Object>(from.values);
-	}
-
-	public String getPath() {
-		return path;
-	}
-
-	public void setPath(String path) {
-		this.path = path;
 	}
 
 	@Override

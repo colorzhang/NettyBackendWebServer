@@ -16,31 +16,33 @@ import io.netty.handler.codec.http.ServerCookieEncoder;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.Queue;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+
+import test.backend.http.message.FullEncodedResponse;
 
 public class ResponseEncoder extends ChannelOutboundHandlerAdapter {
 
 	private static final String SESSION_COOKIE_NAME = "JSESSIOINID";
 	private static final SecureRandom random = new SecureRandom();
-	private final Queue<HttpRequest> requestQueue;
-
-	public ResponseEncoder(Queue<HttpRequest> requestQueue) {
-		this.requestQueue = requestQueue;
-	}
+	private static final Map<Long, HttpResponse> pendingResponses = new HashMap<>();
+	private long orderNumber;
 
 	@Override
 	public void write(ChannelHandlerContext ctx, Object msg,
 			ChannelPromise promise) throws Exception {
-		if (!(msg instanceof HttpResponse)) {
+		if (!(msg instanceof FullEncodedResponse)) {
 			super.write(ctx, msg, promise);
 			return;
 		}
 
-		HttpResponse response = (HttpResponse) msg;
-		HttpRequest request = requestQueue.poll();
+		FullEncodedResponse encodedResponse = (FullEncodedResponse) msg;
 
-		String cookieString = request.headers().get(COOKIE);
+		HttpResponse httpResponse = encodedResponse.getHttpResponse();
+		HttpRequest httpRequest = encodedResponse.getRequest().getHttpRequest();
+
+		String cookieString = httpRequest.headers().get(COOKIE);
 		Boolean hasSessionId = false;
 		if (cookieString != null) {
 			Set<Cookie> cookies = CookieDecoder.decode(cookieString);
@@ -50,33 +52,48 @@ public class ResponseEncoder extends ChannelOutboundHandlerAdapter {
 					if (cookie.getName().equals(SESSION_COOKIE_NAME)) {
 						hasSessionId = true;
 					}
-					response.headers().add(SET_COOKIE,
+					httpResponse.headers().add(SET_COOKIE,
 							ServerCookieEncoder.encode(cookie));
 				}
 			}
 		}
 		if (!hasSessionId) {
-			response.headers().add(
+			httpResponse.headers().add(
 					SET_COOKIE,
 					ServerCookieEncoder.encode(SESSION_COOKIE_NAME,
 							nextSessionId()));
 		}
 
-		Boolean keepAlive = isKeepAlive(request);
+		Boolean keepAlive = isKeepAlive(httpRequest);
 
 		if (keepAlive) {
-			// Add keep alive header as per:
-			// -
+			// Add keep alive header as per
 			// http://www.w3.org/Protocols/HTTP/1.1/draft-ietf-http-v11-spec-01.html#Connection
-			response.headers().set(CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+			httpResponse.headers().set(CONNECTION,
+					HttpHeaders.Values.KEEP_ALIVE);
 		} else {
-			response.headers().set(CONNECTION, HttpHeaders.Values.CLOSE);
+			httpResponse.headers().set(CONNECTION, HttpHeaders.Values.CLOSE);
 		}
 
-		ctx.write(msg, promise);
+		pendingResponses.put(encodedResponse.getRequest().getOrderNumber(),
+				httpResponse);
+
+		sendPending(ctx, promise);
 	}
 
-	public String nextSessionId() {
+	private void sendPending(ChannelHandlerContext ctx, ChannelPromise promise) {
+		while (true) {
+			HttpResponse response = pendingResponses.remove(orderNumber);
+			if (response == null)
+				break;
+			ctx.write(response);
+			orderNumber += 1;
+		}
+		if (pendingResponses.isEmpty())
+			ctx.flush();
+	}
+
+	private String nextSessionId() {
 		return new BigInteger(130, random).toString(32);
 	}
 }

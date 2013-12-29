@@ -69,3 +69,31 @@ requests: 100000 total, 100000 started, 100000 done, 100000 succeeded, 0 failed,
 status codes: 100000 2xx, 0 3xx, 0 4xx, 0 5xx
 traffic: 17196741 bytes total, 14696741 bytes http, 2500000 bytes data
 
+
+telnet localhost 9999
+Trying ::1...
+Connected to localhost.
+Escape character is '^]'.
+GET /?duration=5 HTTP/1.1
+User-Agent: curl/7.33.0
+Host: localhost:9999
+Accept: */*
+
+GET /?duration=3 HTTP/1.1
+User-Agent: curl/7.33.0
+Host: localhost:9999
+Accept: */*
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 18
+Set-Cookie: JSESSIOINID=e9ma1foeretnh19u4demqta7tr
+Connection: keep-alive
+
+"Slept for 5 secs"HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 18
+Set-Cookie: JSESSIOINID=8ti5pbfc0dmd4r09i6or005r6b
+Connection: keep-alive
+
+"Slept for 3 secs"Connection closed by foreign host.

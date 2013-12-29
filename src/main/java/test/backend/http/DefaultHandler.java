@@ -9,11 +9,11 @@ import io.netty.util.concurrent.GenericFutureListener;
 import java.util.concurrent.Callable;
 
 import test.backend.Provider;
-import test.backend.Values;
+import test.backend.http.message.FullDecodedRequest;
+import test.backend.http.message.Response;
 
-public class DefaultHandler extends SimpleChannelInboundHandler<Values> {
-
-	private Future<? extends Object> future;
+public class DefaultHandler extends
+		SimpleChannelInboundHandler<FullDecodedRequest> {
 
 	private final EventExecutorGroup executor;
 
@@ -23,17 +23,19 @@ public class DefaultHandler extends SimpleChannelInboundHandler<Values> {
 
 	@Override
 	protected void channelRead0(final ChannelHandlerContext ctx,
-			final Values values) throws Exception {
-		Callable<? extends Object> callable = new Provider(values);
+			final FullDecodedRequest decodedRequest) throws Exception {
+		Callable<? extends Object> callable = new Provider(
+				decodedRequest.getPath(), decodedRequest.getValues());
 
-		future = executor.submit(callable);
+		final Future<? extends Object> future = executor.submit(callable);
 
 		future.addListener(new GenericFutureListener<Future<Object>>() {
 			@Override
 			public void operationComplete(Future<Object> future)
 					throws Exception {
 				if (future.isSuccess()) {
-					ctx.writeAndFlush(future.get());
+					ctx.writeAndFlush(new Response(decodedRequest.getRequest(),
+							future.get()));
 				} else {
 					ctx.fireExceptionCaught(future.cause());
 				}
@@ -44,9 +46,11 @@ public class DefaultHandler extends SimpleChannelInboundHandler<Values> {
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 		super.channelInactive(ctx);
-		if (future != null && !future.isDone()) {
-			future.cancel(true);
-		}
+		// TODO(adolgarev): cancel submitted tasks,
+		// that works only for not in progress tasks
+		// if (future != null && !future.isDone()) {
+		// future.cancel(true);
+		// }
 	}
 
 }

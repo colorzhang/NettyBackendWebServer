@@ -1,18 +1,22 @@
 package test.backend.http;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
+import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
+import static io.netty.handler.codec.http.HttpResponseStatus.OK;
+import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
+import test.backend.http.message.FullEncodedResponse;
+import test.backend.http.message.Response;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
-import static io.netty.handler.codec.http.HttpHeaders.Names.*;
-import static io.netty.handler.codec.http.HttpResponseStatus.*;
 import io.netty.handler.codec.http.HttpResponse;
-import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 import io.netty.util.CharsetUtil;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class JacksonJsonResponseEncoder extends ChannelOutboundHandlerAdapter {
 
@@ -30,23 +34,28 @@ public class JacksonJsonResponseEncoder extends ChannelOutboundHandlerAdapter {
 			return;
 		}
 
+		Response response = (Response) msg;
+
 		String res;
 		try {
-			res = objectMapper.writeValueAsString(msg);
+			res = objectMapper.writeValueAsString(response.getPayload());
 		} catch (Exception ex) {
 			ctx.fireExceptionCaught(ex);
 			return;
 		}
 
 		// Build the response object
-		FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK,
-				Unpooled.copiedBuffer(res, CharsetUtil.UTF_8));
+		FullHttpResponse httpResponse = new DefaultFullHttpResponse(HTTP_1_1,
+				OK, Unpooled.copiedBuffer(res, CharsetUtil.UTF_8));
 
-		response.headers().set(CONTENT_TYPE, "application/json");
-		response.headers().set(CONTENT_LENGTH,
-				response.content().readableBytes());
+		httpResponse.headers().set(CONTENT_TYPE, "application/json");
+		httpResponse.headers().set(CONTENT_LENGTH,
+				httpResponse.content().readableBytes());
+
+		FullEncodedResponse encodedResponse = new FullEncodedResponse(
+				response.getRequest(), httpResponse);
 
 		// Write the response
-		ctx.write(response, promise);
+		ctx.write(encodedResponse, promise);
 	}
 }
