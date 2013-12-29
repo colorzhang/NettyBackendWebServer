@@ -1,16 +1,21 @@
 package test.backend.http;
 
-import test.backend.http.message.Request;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.DecoderResult;
 import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.codec.http.HttpRequest;
-import io.netty.util.ReferenceCountUtil;
+import test.backend.http.message.Request;
 
 public class RequestDecoder extends SimpleChannelInboundHandler<HttpObject> {
-	
+
 	private long orderNumber;
+
+	public RequestDecoder() {
+		// Do not autorelease HttpObject since
+		// it is passed through
+		super(false);
+	}
 
 	@Override
 	public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
@@ -27,12 +32,9 @@ public class RequestDecoder extends SimpleChannelInboundHandler<HttpObject> {
 		}
 
 		if (httpObject instanceof HttpRequest) {
-			HttpRequest request = (HttpRequest) httpObject;
-
-			ReferenceCountUtil.retain(httpObject);
-			ctx.fireChannelRead(new Request(request, orderNumber));
+			HttpRequest httpRequest = (HttpRequest) httpObject;
+			ctx.fireChannelRead(new Request(httpRequest, orderNumber));
+			orderNumber += 1;
 		}
-		
-		orderNumber += 1;
 	}
 }

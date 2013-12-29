@@ -18,6 +18,7 @@ public class DefaultHandler extends
 	private final EventExecutorGroup executor;
 
 	public DefaultHandler(EventExecutorGroup executor) {
+		super(false);
 		this.executor = executor;
 	}
 

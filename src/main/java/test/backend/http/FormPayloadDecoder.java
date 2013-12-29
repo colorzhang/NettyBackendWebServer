@@ -23,6 +23,10 @@ import test.backend.http.message.Request;
 
 public class FormPayloadDecoder extends SimpleChannelInboundHandler<Request> {
 
+	public FormPayloadDecoder() {
+		super(false);
+	}
+
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, Request request)
 			throws IOException, InstantiationException, IllegalAccessException {

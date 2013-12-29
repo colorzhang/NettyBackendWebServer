@@ -40,9 +40,11 @@ public class Provider implements Callable<Object> {
 //			session.commit();
 //		}
 		
-		Integer duration = values.getAsInteger("duration");
-		Thread.sleep(duration * 1000);
-		res = "Slept for " + duration + " secs";
+//		Integer duration = values.getAsInteger("duration");
+//		Thread.sleep(duration * 1000);
+//		res = "Slept for " + duration + " secs";
+		
+		res = "Ok";
 
 		return res;
 		// throw new RuntimeException("Hello, Exception!");

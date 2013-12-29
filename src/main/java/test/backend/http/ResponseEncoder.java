@@ -13,6 +13,7 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.ServerCookieEncoder;
+import io.netty.util.ReferenceCountUtil;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -26,7 +27,7 @@ public class ResponseEncoder extends ChannelOutboundHandlerAdapter {
 
 	private static final String SESSION_COOKIE_NAME = "JSESSIOINID";
 	private static final SecureRandom random = new SecureRandom();
-	private static final Map<Long, HttpResponse> pendingResponses = new HashMap<>();
+	private final Map<Long, HttpResponse> pendingResponses = new HashMap<>();
 	private long orderNumber;
 
 	@Override
@@ -77,16 +78,17 @@ public class ResponseEncoder extends ChannelOutboundHandlerAdapter {
 
 		pendingResponses.put(encodedResponse.getRequest().getOrderNumber(),
 				httpResponse);
-
+		ReferenceCountUtil.release(httpRequest);
 		sendPending(ctx, promise);
 	}
 
-	private void sendPending(ChannelHandlerContext ctx, ChannelPromise promise) {
+	private void sendPending(ChannelHandlerContext ctx,
+			ChannelPromise promise) {
 		while (true) {
 			HttpResponse response = pendingResponses.remove(orderNumber);
 			if (response == null)
 				break;
-			ctx.write(response);
+			ctx.write(response, promise);
 			orderNumber += 1;
 		}
 		if (pendingResponses.isEmpty())
