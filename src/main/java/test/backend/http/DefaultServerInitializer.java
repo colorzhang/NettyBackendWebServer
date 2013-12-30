@@ -39,9 +39,9 @@ public class DefaultServerInitializer extends ChannelInitializer<SocketChannel> 
 				new HttpObjectAggregator(conf.getClientMaxBodySize()));
 		p.addLast("httpDecoderAux", new RequestDecoder());
 		p.addLast("httpEncoder", new HttpResponseEncoder());
-		p.addLast("httpEncoderAux", new ResponseEncoder());
 		// Automatic content compression
-		p.addLast("httpDeflater", new HttpContentCompressor());
+//		p.addLast("httpDeflater", new HttpContentCompressor());
+		p.addLast("httpEncoderAux", new ResponseEncoder());
 		p.addLast("httpPayloadEncoder", new JacksonJsonResponseEncoder());
 		p.addLast("httpPayloadDecoder", new FormPayloadDecoder());
 		p.addLast("handler", new DefaultHandler(executor));
