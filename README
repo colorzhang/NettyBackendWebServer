@@ -1,12 +1,11 @@
 Intel(R) Core(TM) i7-2630QM CPU @ 2.00GHz
 MemTotal:        3956836 kB
 
-
-build/default/weighttp -n 100000 -k -c 100 http://localhost:9999/
+build/default/weighttp -n 1000000 -k -c 100 http://localhost:9999/
 weighttp - a lightweight and simple webserver benchmarking tool
 
 starting benchmark...
-spawning thread #1: 100 concurrent requests, 100000 total requests
+spawning thread #1: 100 concurrent requests, 1000000 total requests
 progress:  10% done
 progress:  20% done
 progress:  30% done
@@ -18,10 +17,10 @@ progress:  80% done
 progress:  90% done
 progress: 100% done
 
-finished in 2 sec, 34 millisec and 185 microsec, 49159 req/s, 7247 kbyte/s
-requests: 100000 total, 100000 started, 100000 done, 100000 succeeded, 0 failed, 0 errored
-status codes: 100000 2xx, 0 3xx, 0 4xx, 0 5xx
-traffic: 15096896 bytes total, 14596896 bytes http, 500000 bytes data
+finished in 9 sec, 298 millisec and 269 microsec, 107546 req/s, 10292 kbyte/s
+requests: 1000000 total, 1000000 started, 1000000 done, 1000000 succeeded, 0 failed, 0 errored
+status codes: 1000000 2xx, 0 3xx, 0 4xx, 0 5xx
+traffic: 98000000 bytes total, 94000000 bytes http, 4000000 bytes data
 
 
 With MyBatis and cache

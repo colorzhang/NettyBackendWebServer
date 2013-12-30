@@ -43,7 +43,7 @@ public class ResponseEncoder extends ChannelOutboundHandlerAdapter {
 		HttpResponse httpResponse = encodedResponse.getHttpResponse();
 		HttpRequest httpRequest = encodedResponse.getRequest().getHttpRequest();
 
-		String cookieString = httpRequest.headers().get(COOKIE);
+		/*String cookieString = httpRequest.headers().get(COOKIE);
 		Boolean hasSessionId = false;
 		if (cookieString != null) {
 			Set<Cookie> cookies = CookieDecoder.decode(cookieString);
@@ -63,7 +63,7 @@ public class ResponseEncoder extends ChannelOutboundHandlerAdapter {
 					SET_COOKIE,
 					ServerCookieEncoder.encode(SESSION_COOKIE_NAME,
 							nextSessionId()));
-		}
+		}*/
 
 		Boolean keepAlive = isKeepAlive(httpRequest);
 
@@ -76,10 +76,16 @@ public class ResponseEncoder extends ChannelOutboundHandlerAdapter {
 			httpResponse.headers().set(CONNECTION, HttpHeaders.Values.CLOSE);
 		}
 
-		pendingResponses.put(encodedResponse.getRequest().getOrderNumber(),
-				httpResponse);
-		ReferenceCountUtil.release(httpRequest);
-		sendPending(ctx, promise);
+                ReferenceCountUtil.release(httpRequest);
+                if (encodedResponse.getRequest().getOrderNumber() == orderNumber) {
+                    ctx.writeAndFlush(httpResponse, promise);
+                    orderNumber += 1;
+                }
+                else {
+                    pendingResponses.put(encodedResponse.getRequest().getOrderNumber(),
+                                    httpResponse);
+                    sendPending(ctx, promise);
+                }
 	}
 
 	private void sendPending(ChannelHandlerContext ctx,
